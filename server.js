@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const jwt = require("jsonwebtoken");
+const { v4: uuidv4 } = require("uuid");
 
 const app = express();
 const port = 3000;
@@ -19,14 +20,17 @@ var users = [
   { userName: "Oscar", password: "os81" },
 ];
 
+// Get all messages
 app.get("/messages", (_, res) => {
   res.send(messages);
 });
 
+// Get individual message
 app.get("/messages/:id", (req, res) => {
   res.send(messages[req.params.id]);
 });
 
+// Add new message
 app.post("/messages", (req, res) => {
   const token = req.header("Authorization");
   const userId = jwt.decode(token, SECRET);
@@ -36,14 +40,14 @@ app.post("/messages", (req, res) => {
   res.json(msg);
 });
 
-app.post("/register", (req, res) => {
-  let registerData = req.body;
-  let newIndex = users.push(registerData);
-  let userId = newIndex - 1;
+// Register new user
+app.post("/register", (_, res) => {
+  let userId = uuidv4();
   let token = jwt.sign(userId, SECRET);
   res.json(token);
 });
 
+// Login user
 app.post("/login", (req, res) => {
   let loginData = req.body;
   let userId = users.findIndex((user) => user.userName == loginData.userName);
