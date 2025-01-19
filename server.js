@@ -11,11 +11,11 @@ const SECRET = "jwt_secret_key";
 app.use(cors());
 app.use(bodyParser.json());
 
-var messages = [
+let messages = [
   { user: "Lando", text: "Oscar, are you there?" },
   { user: "Oscar", text: "What's up?" },
 ];
-var users = [
+let users = [
   { userName: "Lando", password: "ln03" },
   { userName: "Oscar", password: "os81" },
 ];
@@ -35,31 +35,33 @@ app.post("/messages", (req, res) => {
   const token = req.header("Authorization");
   const userId = jwt.decode(token, SECRET);
   const user = users[userId];
-  let msg = { user: user.userName, text: req.body.message };
+  const msg = { user: user.userName, text: req.body.message };
   messages.push(msg);
   res.json(msg);
 });
 
 // Register new user
-app.post("/register", (_, res) => {
-  let userId = uuidv4();
-  let token = jwt.sign(userId, SECRET);
+app.post("/register", (req, res) => {
+  const registerData = req.body;
+  const newIndex = users.push(registerData);
+  const userId = newIndex - 1;
+  const token = jwt.sign(userId, SECRET);
   res.json(token);
 });
 
 // Login user
 app.post("/login", (req, res) => {
-  let loginData = req.body;
-  let userId = users.findIndex((user) => user.userName == loginData.userName);
+  const loginData = req.body;
+  const userId = users.findIndex((user) => user.userName == loginData.userName);
 
   if (userId == -1)
-    return res.status(401).send({ message: "name or password is invalid" });
+    return res.status(401).send({ message: "Name or password is invalid" });
 
   if (users[userId].password != loginData.password)
-    return res.status(401).send({ message: "name or password is invalid" });
+    return res.status(401).send({ message: "Name or password is invalid" });
 
-  let token = jwt.sign(userId, SECRET);
+  const token = jwt.sign(userId, SECRET);
   res.json(token);
 });
 
-app.listen(port, () => console.log("app running"));
+app.listen(port, () => console.log(`Server running on port ${port}`));
